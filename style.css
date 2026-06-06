@@ -1,0 +1,569 @@
+/* ==========================================================================
+   UNIQLOCK Design System & Styling
+   ========================================================================== */
+
+/* Variables & Design Tokens */
+:root {
+    --uq-red: #E60012;
+    --uq-dark: #111111;
+    --uq-light: #F8F9FA;
+    --uq-border-radius: 4px;
+    --uq-font-main: 'Outfit', sans-serif;
+    --uq-font-clock: 'Space Mono', monospace;
+    
+    /* Default Clock Background Theme (Will cycle dynamically) */
+    --theme-color: #E60012;
+    --theme-text: #FFFFFF;
+    --theme-accent: rgba(255, 255, 255, 0.4);
+}
+
+/* Reset and Base Styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+body {
+    background-color: #0b0b0c;
+    color: var(--uq-light);
+    font-family: var(--uq-font-main);
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Start Overlay (To handle Autoplay policy) */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--uq-dark);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    opacity: 1;
+    transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.8s;
+}
+
+.overlay.fade-out {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.start-card {
+    text-align: center;
+    max-width: 480px;
+    padding: 40px;
+    background: #18181c;
+    border: 1px solid #2a2a32;
+    border-radius: 8px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes cardEntrance {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.uniqlo-logo {
+    display: inline-flex;
+    flex-direction: column;
+    background-color: var(--uq-red);
+    color: white;
+    font-family: var(--uq-font-main);
+    font-weight: 800;
+    font-size: 2.2rem;
+    line-height: 0.95;
+    padding: 12px 14px;
+    letter-spacing: -1px;
+    margin-bottom: 24px;
+    border-radius: 2px;
+}
+
+.uniqlo-logo .logo-sub {
+    font-size: 1.1rem;
+    font-weight: 400;
+    letter-spacing: 2px;
+    margin-top: 2px;
+}
+
+.start-card h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    color: var(--uq-light);
+}
+
+.start-card .description {
+    font-size: 0.95rem;
+    color: #a0a0ab;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.btn-primary {
+    background-color: var(--uq-red);
+    color: white;
+    border: none;
+    padding: 16px 36px;
+    font-family: var(--uq-font-main);
+    font-weight: 600;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    border-radius: var(--uq-border-radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 15px rgba(230, 0, 18, 0.4);
+    transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: #ff1a2e;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(230, 0, 18, 0.6);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-primary svg {
+    width: 20px;
+    height: 20px;
+}
+
+.footer-note {
+    margin-top: 24px;
+    font-size: 0.75rem;
+    color: #52525b;
+}
+
+/* App Main Layout */
+#app-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100vh;
+    transition: filter 1s ease;
+}
+
+.app-hidden {
+    filter: blur(20px);
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 1:1 Widget Frame */
+#widget-frame {
+    width: 500px;
+    height: 500px;
+    background-color: var(--uq-dark);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    border: 1px solid #1f1f23;
+    transition: width 0.5s ease, height 0.5s ease;
+}
+
+/* Screen States */
+.widget-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    z-index: 1;
+    pointer-events: none;
+    transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.widget-screen.active {
+    opacity: 1;
+    z-index: 2;
+    pointer-events: auto;
+}
+
+/* Clock Display Styling */
+#clock-screen {
+    background-color: var(--theme-color);
+    color: var(--theme-text);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+.clock-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.time-display {
+    font-family: var(--uq-font-clock);
+    font-size: 4.8rem;
+    font-weight: 700;
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-bottom: 5px;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.clock-extra {
+    display: flex;
+    align-items: flex-end;
+    gap: 15px;
+    margin-top: 5px;
+}
+
+.ms-display {
+    font-family: var(--uq-font-clock);
+    font-size: 2.2rem;
+    font-weight: 400;
+    opacity: 0.85;
+    min-width: 50px;
+}
+
+.date-display {
+    font-family: var(--uq-font-main);
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--theme-accent);
+    padding-bottom: 6px;
+}
+
+/* Ticking beat visualizer bar */
+.beat-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.pulse-line {
+    width: 0%;
+    height: 100%;
+    background-color: var(--theme-text);
+    opacity: 0.7;
+    transition: width 0.1s linear;
+}
+
+/* Dance Screen Canvas Styling */
+#dance-screen {
+    background-color: #0c0c0e;
+}
+
+#dancer-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.overlay-track-info {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-family: var(--uq-font-clock);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.4);
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* Visualizer dots in the corners of the canvas */
+.visualizer-dots {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.dot {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--uq-red);
+    opacity: 0.2;
+    transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
+.dot-1 { top: 20px; right: 20px; }
+.dot-2 { bottom: 20px; right: 20px; }
+.dot-3 { bottom: 20px; left: 20px; }
+.dot-4 { top: 20px; left: 20px; }
+
+.dot.pulse {
+    opacity: 1;
+    transform: scale(2.2);
+}
+
+/* Transition Curtain */
+.curtain {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000000;
+    z-index: 10;
+    transform: translateY(100%);
+    pointer-events: none;
+}
+
+.curtain.sweep {
+    animation: sweepTransition 0.5s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+
+@keyframes sweepTransition {
+    0% {
+        transform: translateY(100%);
+    }
+    50% {
+        transform: translateY(0%);
+    }
+    100% {
+        transform: translateY(-100%);
+    }
+}
+
+/* Control Bar - Glassmorphism style */
+#control-bar {
+    width: 500px;
+    margin-top: 20px;
+    padding: 12px 16px;
+    background: rgba(24, 24, 28, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    transition: width 0.5s ease;
+    z-index: 20;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.text-info {
+    font-size: 0.85rem;
+    color: #a0a0ab;
+}
+
+.track-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--uq-font-clock);
+}
+
+.status-indicator-light {
+    width: 8px;
+    height: 8px;
+    background-color: #10b981;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #10b981;
+    display: inline-block;
+}
+
+.status-indicator-light.paused {
+    background-color: #f59e0b;
+    box-shadow: 0 0 8px #f59e0b;
+}
+
+.control-btn {
+    background: transparent;
+    border: none;
+    color: #e4e4e7;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, transform 0.1s;
+}
+
+.control-btn:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: white;
+}
+
+.control-btn:active {
+    transform: scale(0.9);
+}
+
+.btn-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Volume Control */
+.volume-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+}
+
+#volume-slider {
+    width: 60px;
+    height: 4px;
+    background: #3f3f46;
+    border-radius: 2px;
+    outline: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    transition: width 0.3s ease, background-color 0.2s;
+}
+
+#volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--uq-light);
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+#volume-slider::-webkit-slider-thumb:hover {
+    background: var(--uq-red);
+    transform: scale(1.3);
+}
+
+/* Dropdown styling */
+.dropdown-control {
+    background: #18181c;
+    border: 1px solid #3f3f46;
+    color: #e4e4e7;
+    padding: 6px 12px;
+    font-family: var(--uq-font-main);
+    font-size: 0.8rem;
+    font-weight: 500;
+    border-radius: var(--uq-border-radius);
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+.dropdown-control:hover {
+    border-color: #52525b;
+    background-color: #1f1f23;
+}
+
+/* Fullscreen Mode Modification */
+.fullscreen-mode #widget-frame {
+    width: 100vw !important;
+    height: 100vh !important;
+    border: none;
+    box-shadow: none;
+}
+
+.fullscreen-mode #control-bar {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+}
+
+/* Color Themes for clock */
+.theme-red {
+    --theme-color: #E60012;
+    --theme-accent: rgba(255, 255, 255, 0.4);
+}
+.theme-blue {
+    --theme-color: #0f4c81;
+    --theme-accent: rgba(255, 255, 255, 0.35);
+}
+.theme-green {
+    --theme-color: #008b45;
+    --theme-accent: rgba(255, 255, 255, 0.35);
+}
+.theme-orange {
+    --theme-color: #ff5e00;
+    --theme-accent: rgba(255, 255, 255, 0.4);
+}
+.theme-purple {
+    --theme-color: #5a189a;
+    --theme-accent: rgba(255, 255, 255, 0.35);
+}
+.theme-navy {
+    --theme-color: #1d2a44;
+    --theme-accent: rgba(255, 255, 255, 0.3);
+}
+.theme-pink {
+    --theme-color: #ff5c8a;
+    --theme-accent: rgba(255, 255, 255, 0.45);
+}
+
+/* Responsive adjustments */
+@media (max-width: 540px) {
+    #widget-frame {
+        width: 90vw;
+        height: 90vw;
+    }
+    #control-bar {
+        width: 90vw;
+        flex-direction: column;
+        gap: 12px;
+        padding: 16px;
+    }
+    .time-display {
+        font-size: 3.5rem;
+    }
+    .ms-display {
+        font-size: 1.6rem;
+    }
+    .fullscreen-mode #control-bar {
+        width: 90vw;
+    }
+}
